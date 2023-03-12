@@ -11,6 +11,8 @@ const app = express();
 
 const port = 3000;
 
+const path = require('path');
+
 //Tell express to use the body parser module
 app.use(bodyParser.json());
 
@@ -67,6 +69,24 @@ const genres = [
 ];
 
 //Your endpoints go here
+app.use(express.static('prj03'))
+app.use(express.static('public'))
+
+
+app.get('/', (req, res) => {
+  const options = {
+    root: path.join(__dirname)
+  };
+  const fileName = 'index.html';
+  res.sendFile(fileName, options, (err) => {
+    if (err) {
+      next(err);
+    } else {
+      console.log('Sent:' + fileName);
+    }
+  });
+});
+
 
 //Start the server
 app.listen(port, () => {
