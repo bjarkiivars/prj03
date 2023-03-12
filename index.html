@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <title>Piano Application</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- We need to import Axios in order to be able to use the axios object below -->
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+        <script src="https://unpkg.com/tone"></script>
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+
+    <body>
+        <div class="keyboard">
+            <div id="controlDiv">
+                <div class="controlSubDiv">
+                    <label for="tunesDrop">Tune:</label>
+                    <select name="tunes" id="tunesDrop">
+                    </select>
+                    <button id="tunebtn">
+                        <img class="controlimg" src="./public/play.png" alt="Play the selected tune">
+                    </button>
+                </div>
+                <div class="controlSubDiv">
+                    <label for="recordbtn">Record:</label>
+                    <button id="recordbtn">
+                        <img class="controlimg" src="./public/record.png" alt="Record a new tune">
+                    </button>
+
+                    <button id="stopbtn" disabled>
+                        <img class="controlimg" src="./public/stop.png" alt="Stop recording of tune">
+                    </button>
+
+                    <label for="genresDrop">Genre:</label>
+                    <select name="genres" id="genresDrop"></select>
+
+                    <input type="text" id="recordName" name="recordName" value="No-name tune" />
+                </div>
+            </div>
+            <div id="keyboardDiv">
+                <button id="c4" class="whitebtn" onclick="pianoKeyClick('c4')">
+                    <span>C4</span>
+                    <span>(a)</span>
+                </button>
+                <button id="c#4" class="blackbtn" onclick="pianoKeyClick('c#4')">
+                    <span>C</span>
+                    <span>(w)</span>
+                </button>
+                <button id="d4" class="whitebtn" onclick="pianoKeyClick('d4')">
+                    <span>D4</span>
+                    <span>(s)</span>
+                </button>
+                <button id="d#4" class="blackbtn" onclick="pianoKeyClick('d#4')">
+                    <span>D#4</span>
+                    <span>(e)</span>
+                </button>
+                <button id="e4" class="whitebtn" onclick="pianoKeyClick('e4')">
+                    <span>E4</span>
+                    <span>(d)</span>
+                </button>
+                <button id="f4" class="whitebtn" onclick="pianoKeyClick('f4')">
+                    <span>F4</span>
+                    <span>(f)</span>
+                </button>
+                <button id="f#4" class="blackbtn" onclick="pianoKeyClick('f#4')">
+                    <span>F#4</span>
+                    <span>(t)</span>
+                </button>
+                <button id="g4" class="whitebtn" onclick="pianoKeyClick('g4')">
+                    <span>G4</span>
+                    <span>(g)</span>
+                </button>
+                <button id="g#4" class="blackbtn" onclick="pianoKeyClick('g#4')">
+                    <span>G#4</span>
+                    <span>(y)</span>
+                </button>
+                <button id="a4" class="whitebtn" onclick="pianoKeyClick('a4')">
+                    <span>A4</span>
+                    <span>(h)</span>
+                </button>
+                <button id="bb4" class="blackbtn" onclick="pianoKeyClick('bb4')">
+                    <span>Bb4</span>
+                    <span>(u)</span>
+                </button>
+                <button id="b4" class="whitebtn" onclick="pianoKeyClick('b4')">
+                    <span>B4</span>
+                    <span>(j)</span>
+                </button>
+                <button id="c5" class="whitebtn" onclick="pianoKeyClick('c5')">
+                    <span>C5</span>
+                    <span>(k)</span>
+                </button>
+                <button id="c#5" class="blackbtn" onclick="pianoKeyClick('c#5')">
+                    <span>C#5</span>
+                    <span>(o)</span>
+                </button>
+                <button id="d5" class="whitebtn" onclick="pianoKeyClick('d5')">
+                    <span>D5</span>
+                    <span>(l)</span>
+                </button>
+                <button id="d#5" class="blackbtn" onclick="pianoKeyClick('d#5')">
+                    <span>D#5</span>
+                    <span>(p)</span>
+                </button>
+                <button id="e5" class="whitebtn" onclick="pianoKeyClick('e5')">
+                    <span>E5</span>
+                    <span>(;)</span>
+                </button>
+            </div>
+        </div>
+        <div id="tooSmallWarning">
+            <img id="oopsimg" src="./public/oops.jpg" alt="An image saying oops">
+            <p>This website requires at least 600px screen width.</p>
+        </div>
+
+        <script src="app.js"></script>
+    </body>
+
+</html>

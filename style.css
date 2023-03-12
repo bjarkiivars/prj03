@@ -1,0 +1,132 @@
+.keyboard {
+  background: #301c82;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+#controlDiv {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  margin: 0 10%;
+  background: green;
+  margin-bottom: 20px;
+}
+
+#controlDiv button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+}
+
+#keyboardDiv {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  padding: 0 10%;
+}
+
+#keyboardDiv button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.controlimg {
+  width: 16px;
+  height: 16px;
+}
+
+button:enabled:active {
+  background-color: gray;
+}
+
+.whitebtn {
+  background-color: white;
+  height: 200px;
+}
+
+.blackbtn {
+  background-color: black;
+  height: 120px;
+  width: 4%;
+  color: white;
+}
+
+#c\#4 {
+  position: absolute;
+  left: 16%;
+  top: 0px;
+}
+
+#d\#4 {
+  position: absolute;
+  left: 24%;
+  top: 0px;
+}
+
+#f\#4 {
+  position: absolute;
+  left: 40%;
+  top: 0px;
+}
+
+#g\#4 {
+  position: absolute;
+  left: 48%;
+  top: 0px;
+}
+
+#bb4 {
+  position: absolute;
+  left: 56%;
+  top: 0px;
+}
+
+#c\#5 {
+  position: absolute;
+  left: 72%;
+  top: 0px;
+}
+
+#d\#5 {
+  position: absolute;
+  left: 80%;
+  top: 0px;
+}
+
+#tooSmallWarning {
+  display: none;
+}
+
+@media print {
+  .keyboard,
+  #controlDiv {
+    background: none;
+  }
+}
+
+@media only screen and (max-width: 599px) {
+  .keyboard {
+    display: none;
+  }
+
+  #tooSmallWarning {
+    display: block;
+    margin: auto;
+    width: 80%;
+  }
+
+  #oopsimg {
+    width: 100%;
+  }
+
+  p {
+    text-align: center;
+  }
+}
