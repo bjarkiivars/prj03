@@ -74,63 +74,112 @@ const genres = [
   { id: "1", genreName: "Classic" },
 ];
 
+//Function that takes an array, and finds the current highest id, returns the id which is next
+const nextId = (arr) => {
+  let maxId = 0;
+  //If we are empty, next id is 0, if not we find what the next one is
+  if (arr.length > 0) {
+    //Iterate searching for the highest id
+    arr.forEach((obj) => {
+      if (obj.id > maxId) maxId = obj.id; 
+    });
+    //Return the highest id as a number with + 1 added for the next id
+    return (+maxId) + 1;
+  }
+
+  return +0;
+};
+
 //Your endpoints go here
 
-/*
-Read all tunes
-Returns an array of all tunes. For each tune, only the id, the name, and the genreId are
-included in the response. Additionally, providing the filter query parameter returns only
-the tunes that are in the genre with the provided name. If no tune is in the provided
-genre, or no genre with the provided name exists, an empty array is returned. Returning
-an empty array is important so the frontend can expect an array, no matter the result
+//For postman tests: http://localhost:3000/read/tunes?filter=Rock
+//Endpoint to get all tunes
+app.get(myApi + "read/tunes", (req, res) => {
+
+  const filter = req.query.filter;
+
+  //If filter is not provided, return all tunes
+  if (!filter) {
+    //Map id, name and genreId to a new array allTunes for return
+    const allTunes = tunes.map((tune) => ({
+      id: tune.id,
+      name: tune.name,
+      genreId: tune.genreId,
+    }));
+    return res.status(200).json(allTunes);
+  }
+  //If filter is provided, find the genre with the provided name
+  let genre = genres.find((genreObj) => genreObj.genreName === filter);
+
+  //If no genre is found, return an empty array
+  if (!genre) {
+    return res.status(200).json([]);
+  }
+
+  //Filter the tunes based on the genreId
+  let filteredTunes = tunes.filter((tunesObj) => tunesObj.genreId === genre.id);
+
+  res.status(200).json(
+    //Return an array of objects with only the id, name, and genreId properties
+    //Use the map method to map our filteredTunes array to a return array
+    filteredTunes.map((tunesObj) => {
+      return {
+        id: tunesObj.id,
+        name: tunesObj.name,
+        genreId: tunesObj.genreId,
+      };
+    })
+  );
+});
+
+//Read an individual tune
+app.get(myApi + 'tunes/:id', (req, res) => {
+  
+  //Retrieve the id parameter from the URL
+  const paramId = req.params.id;
+
+  //If no id is given or selected, return all tunes
+  if(!paramId) { // <!-- ATTENTION, THIS IS NOT FINISHED BORK, also remove.. ffs-->
+    return res.status(200).json(tunes);
+  }
+
+  //If the id is not a number or is < 0, we return with a 400 request 'bad request'
+  if(isNaN(paramId) || paramId < 0) {
+    return res.status(400).send('The ID must be a number and not < 0.');
+  }
+  
+  //Else, we find a specific tune and return it
+  let tune = tunes.find((tune) => tune.id === paramId);
+
+  //if no tune is found, we return with a 404 not found
+  if(!tune) {
+    return res.status(404).send('The ID selected was not found.');
+  }
+
+  //If we found a tune, we return it.
+  return res.status(200).json(tune);
+});
+
+/* 
+Create a new tune
+Creates a new tune. The endpoint expects the name and content of the tune. Duplicate
+names are allowed. The genreId is provided through the URL. The content attribute
+must be a non-empty array of objects, each of which has the note, timing, and duration
+attributes. The id shall be auto generated (i.e., not provided in the request body). The
+request shall fail if a genre with the given id does not exist. The request, if successful,
+shall return the new resource (all attributes, including id and the full content array).
 */
 
-//Read all tunes, returns all tunes
-app.get(myApi + 'read' + '/tunes', (req, res) => {
-  let temp_arr = [];
-  tunes.forEach((object) => {
-    temp_arr.push({
-      id: object.id,
-      name: object.name,
-      genreId: object.genreId
-    });
-  });
-  res.status(200).json(temp_arr);
+app.post(myApi + 'tunes/:genreId', (req, res) => {
+
 });
 
-/*
-const items = [
-  { id: 1, name: 'Item 1' },
-  { id: 2, name: 'Item 2' },
-  { id: 3, name: 'Item 3' },
-];
-
-app.get('/items/:id', (req, res) => {
-  const id = req.params.id;
-  const filteredItems = items.filter(item => item.id === id);
-  if (filteredItems.length === 0) {
-    res.status(404).send('Item not found');
-  } else {
-    res.send(filteredItems[0]);
-  }
-});
-*/
-
-app.get(myApi + 'read' + '/tunes/:genreName', (req, res) => {
-  const genreNameParam = req.params.genreName;
-  const filteredGenre = genres.filter(obj => obj.genreName === genreNameParam);
-  if (filteredGenre.length === 0) {
-    res.status(200).json([]);
-  } else {
-    res.send(filteredGenre[0].id);
-  }
-});
-
-
+//This endpoint returns the whole object
 //return tunes array
 app.get(myApi + 'tunes', (req, res) => {
   res.status(200).json(tunes);
 });
+
 
 // Serve static files in root directory
 app.use(express.static(__dirname + '/'));
