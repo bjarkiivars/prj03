@@ -11,7 +11,13 @@ const app = express();
 
 const port = 3000;
 
-const path = require('path');
+//Defining our own API
+const api = '/api';
+
+//Declaring which version we are using 
+const version = '/v1/';
+
+const myApi = api + version // /api/v1/
 
 //Tell express to use the body parser module
 app.use(bodyParser.json());
@@ -69,24 +75,36 @@ const genres = [
 ];
 
 //Your endpoints go here
-app.use(express.static('prj03'))
-app.use(express.static('public'))
 
+/*
+Read all tunes
+Returns an array of all tunes. For each tune, only the id, the name, and the genreId are
+included in the response. Additionally, providing the filter query parameter returns only
+the tunes that are in the genre with the provided name. If no tune is in the provided
+genre, or no genre with the provided name exists, an empty array is returned. Returning
+an empty array is important so the frontend can expect an array, no matter the result
+*/
 
-app.get('/', (req, res) => {
-  const options = {
-    root: path.join(__dirname)
-  };
-  const fileName = 'index.html';
-  res.sendFile(fileName, options, (err) => {
-    if (err) {
-      next(err);
-    } else {
-      console.log('Sent:' + fileName);
-    }
-  });
+app.get(myApi + 'tunes', (req, res) => {
+  res.status(200).json(tunes);
 });
 
+// Serve static files in root directory
+app.use(express.static(__dirname + '/'));
+
+// Serve public folder for images
+app.use('/public', express.static(__dirname + '/public'));
+
+// Define index.html route
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
+
+app.all('*', (req, res) => {
+  res.status(404).json({
+    error: 'This resource is not found'
+  });
+});
 
 //Start the server
 app.listen(port, () => {
