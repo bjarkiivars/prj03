@@ -85,6 +85,49 @@ genre, or no genre with the provided name exists, an empty array is returned. Re
 an empty array is important so the frontend can expect an array, no matter the result
 */
 
+//Read all tunes, returns all tunes
+app.get(myApi + 'read' + '/tunes', (req, res) => {
+  let temp_arr = [];
+  tunes.forEach((object) => {
+    temp_arr.push({
+      id: object.id,
+      name: object.name,
+      genreId: object.genreId
+    });
+  });
+  res.status(200).json(temp_arr);
+});
+
+/*
+const items = [
+  { id: 1, name: 'Item 1' },
+  { id: 2, name: 'Item 2' },
+  { id: 3, name: 'Item 3' },
+];
+
+app.get('/items/:id', (req, res) => {
+  const id = req.params.id;
+  const filteredItems = items.filter(item => item.id === id);
+  if (filteredItems.length === 0) {
+    res.status(404).send('Item not found');
+  } else {
+    res.send(filteredItems[0]);
+  }
+});
+*/
+
+app.get(myApi + 'read' + '/tunes/:genreName', (req, res) => {
+  const genreNameParam = req.params.genreName;
+  const filteredGenre = genres.filter(obj => obj.genreName === genreNameParam);
+  if (filteredGenre.length === 0) {
+    res.status(200).json([]);
+  } else {
+    res.send(filteredGenre[0].id);
+  }
+});
+
+
+//return tunes array
 app.get(myApi + 'tunes', (req, res) => {
   res.status(200).json(tunes);
 });
@@ -100,6 +143,7 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
+//Blocking all endpoints that are not defined
 app.all('*', (req, res) => {
   res.status(404).json({
     error: 'This resource is not found'
