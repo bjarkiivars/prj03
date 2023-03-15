@@ -34,7 +34,8 @@ let isRecording = false;
 let startTime = 0;
 
 // We use the async keyword so we can use await inside the function
-const fetchAndPopulateTunes = async () => {
+const 
+fetchAndPopulateTunes = async () => {
   //Perform a GET request to the url
   try {
     // When using axios GET is the default method used

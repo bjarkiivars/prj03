@@ -74,11 +74,12 @@ const genres = [
   { id: "1", genreName: "Classic" },
 ];
 
-//Functions go here
+
+
+// **** Functions go here ****
 
 //Function that takes an array, and finds the current highest id, returns the id which is next
 const nextId = (arr) => {
-  
   let maxId = 0;
 
   //If we are empty, next id is 0, if not we find what the next one is
@@ -96,47 +97,62 @@ const nextId = (arr) => {
   return 0;
 };
 
-//A function that validates the content property of a tunes array, throws an error if unsuccessful
+
+
+//A function that validates the content property of a tunes array
 const validateContent = (content) => {
-  
-  if(!Array.isArray(content)) {
-    content = [content];
-  }
+  //To ensure we get the correct return value,
+  //ForEach does not return out of the function, so I'm changing the value of the return_bool if we find something wrong
+  let return_bool = true;
 
   //If the content has no properties
   if(content.length === 0) {
-    throw new Error('The content must contain at least one note.');
+    return_bool = false;
+    return return_bool;
   };
 
   //Iterate the notes to check if any of the properties are missing
+  //We will also check if the timing is ascending
+  let prior_timing = 0
+
   content.forEach((note) => {
-    if(!note.note || !note.duration || !note.timing) {
-      throw new Error('Each note in the content array must have a note, duration and timing.');
+    if(!note.note || !note.duration || isNaN(note.timing)) {
+      return_bool = false;
+      return return_bool;
     }
+    //Checking if the timing property is in ascending order
+    if(note.timing > 0) {
+      
+      if(prior_timing > note.timing) {
+        return_bool = false;
+        return return_bool;
+      };
+    };
+    prior_timing = note.timing
   });
+  //If all checks pass, we return true
+  return return_bool;
 };
 
-//Your endpoints go here
 
-//*** Get all tunes ***
-//For postman tests: http://localhost:3000/read/tunes?filter=Rock
-app.get(myApi + "read/tunes", (req, res) => {
+//**** Your endpoints go here ****
+
+// **** TUNES ****
+
+//*** read all tunes ***
+app.get(myApi + "tunes", (req, res) => {
 
   const filter = req.query.filter;
 
   //If filter is not provided, return all tunes
   if (!filter) {
     //Map id, name and genreId to a new array allTunes for return
-    const allTunes = tunes.map((tune) => ({
-      id: tune.id,
-      name: tune.name,
-      genreId: tune.genreId,
-    }));
+    const allTunes = tunes.map((tune) => ({ id: tune.id, name: tune.name, genreId: tune.genreId }));
     return res.status(200).json(allTunes);
   }
 
-  //If filter is provided, find the genre with the provided name
-  let genre = genres.find((genreObj) => genreObj.genreName === filter);
+  //If filter is provided, find the genre with the provided id
+  let genre = genres.find((genreObj) => genreObj.id === filter);
 
   //If no genre is found, return an empty array
   if (!genre) {
@@ -150,33 +166,25 @@ app.get(myApi + "read/tunes", (req, res) => {
     //Return an array of objects with only the id, name, and genreId properties
     //Use the map method to map our filteredTunes array to a return array
     filteredTunes.map((tunesObj) => {
-      return {
-        id: tunesObj.id,
-        name: tunesObj.name,
-        genreId: tunesObj.genreId,
-      };
+      return { id: tunesObj.id, name: tunesObj.name, genreId: tunesObj.genreId };
     })
   );
 });
 
+
+
 //*** Read an individual tune ***
-app.get(myApi + 'tunes/:id', (req, res) => {
-  
+app.get(myApi + 'genres/:genreId/tunes/:tuneId', (req, res) => {
   //Retrieve the id parameter from the URL
-  const paramId = req.params.id;
-
-  //If no id is given or selected, return all tunes
-  if(!paramId) { // <!-- ATTENTION, THIS IS NOT FINISHED BORK, also remove.. ffs-->
-    return res.status(200).json(tunes);
-  }
-
+  const tuneId = req.params.tuneId;
+  const genreId = req.params.genreId;
   //If the id is not a number or is < 0, we return with a 400 request 'bad request'
-  if(isNaN(paramId) || paramId < 0) {
+  if(isNaN(tuneId) || tuneId < 0 || isNaN(genreId) || genreId < 0) {
     return res.status(400).send('The ID must be a number and not < 0.');
   }
   
   //Else, we find a specific tune and return it
-  let tune = tunes.find((tune) => tune.id === paramId);
+  let tune = tunes.find((tune) => tune.id === tuneId && tune.genreId === genreId);
 
   //if no tune is found, we return with a 404 not found
   if(!tune) {
@@ -187,52 +195,11 @@ app.get(myApi + 'tunes/:id', (req, res) => {
   return res.status(200).json(tune);
 });
 
-/* 
-Create a new tune
-Creates a new tune. The endpoint expects the name and content of the tune. Duplicate
-names are allowed. The genreId is provided through the URL. The content attribute
-must be a non-empty array of objects, each of which has the note, timing, and duration
-attributes. The id shall be auto generated (i.e., not provided in the request body). The
-request shall fail if a genre with the given id does not exist. The request, if successful,
-shall return the new resource (all attributes, including id and the full content array).
-*/
 
-/*
-//Test data:
-{
-  "name": "TestName",
-  "content" :[
-    { "note": "E5", "duration": "8n", "timing": 0 }
-  ]
-}
-
-//Result: RAW
-// {"id":2,"name":"TestName","genreId":"1","content":[{"note":"E5","duration":"8n","timing":0}]} 
-/*
-//Pretty:
-{
-    "id": 2,
-    "name": "TestName",
-    "genreId": "1",
-    "content": [
-        {
-            "note": "E5",
-            "duration": "8n",
-            "timing": 0
-        }
-    ]
-}
-*/
-
-app.post(myApi + 'testing', (req, res) => {
-  req.body.content.forEach((tune) => {
-    console.log('Im iterating the tune: ' + tune);
-  });
-  return res.status(201).send(typeof req.body.content)
-});
 
 // *** Create a new tune ***
-app.post(myApi + 'tunes/new/:genreId', (req, res) => {
+app.post(myApi + 'genres/:genreId/tunes', (req, res) => {
+  
   //Check if all required input is being sent
   if(!req.body.name || !req.params.genreId || !req.body.content) {
     return res.status(400).send('A tune must contain a name, genreId and content.');
@@ -244,25 +211,18 @@ app.post(myApi + 'tunes/new/:genreId', (req, res) => {
   }
 
   //Run a validation check in the content property
-  /*
-  try {
-    validateContent(req.body.content);
-  } catch (error) {
-    return res.status(400).send(error.message);
-  };
-  */
+  const valid = validateContent(req.body.content);
 
-  req.body.content.forEach((note) => {
-    if(!note.note || !note.duration || !note.timing) {
-      return res.status(400).send('Each note in the content array must have a note, duration and timing.');
-    }
-  });
+  //If any of the checks fail, we return 400
+  if(valid == false) {
+    return res.status(400).send('The content property must have note, duration and timing(which has to be a number) and in ascending order.');
+  }
 
   //Check if the genreId exists in genres
   const genreId = genres.find((genre) => genre.id === req.params.genreId);
 
   if (!genreId) {
-    return res.status(400).send('A genre with this id does not exist.');
+    return res.status(404).send('A genre with this id does not exist.');
   }
 
   //If all checks are successful, we create an object with these properties
@@ -275,15 +235,141 @@ app.post(myApi + 'tunes/new/:genreId', (req, res) => {
     content: req.body.content
   }
 
+  //Push the new tune to our tunes array
   tunes.push(newTune);
+  //Return the new tune
   res.status(201).json(newTune);
+
 });
 
-//This endpoint returns the whole object
-//return tunes array
-app.get(myApi + 'tunes', (req, res) => {
-  res.status(200).json(tunes);
+
+
+//*** Partially update a tune ***
+app.patch(myApi + 'genres/tunes/patch/:genreId?', (req, res) => {
+
+  //Use id as an identifier to find the specific tune
+  const tuneIndex = tunes.findIndex((tune) => tune.id === req.body.id);
+  if(tuneIndex < 0) {
+    return res.status(404).send('No tune was found with this id')
+  }
+  const tuneToChange = tunes[tuneIndex];
+
+  //NAME
+  //If the name is given, we change it in our tuneToChange obj
+  if(req.body.name) {
+    if(typeof req.body.name != "string") {
+      return res.status(400).send('The name must be a string');
+    }
+    //if the name is a string reassign the name.
+    tuneToChange.name = req.body.name;
+  };
+
+  //GENRE ID
+  //If the genreId is given from the URL and we have a genreId in the request body.
+  if(req.params.genreId && req.body.genreId) {
+    
+    //Check if the genreId parameters are numbers, force the req.body to a number, if it's unable to convert, it's NaN.
+    if(isNaN(req.params.genreId) || isNaN(+(req.body.genreId))) {
+      return res.status(400).send('The genreId has to be a number.');
+    } 
+    //Variables for readability
+    const oldGenreId = req.params.genreId;
+    const tuneGenreId = tuneToChange.genreId;
+    const newGenreId = req.body.genreId;
+
+    //Check if the URL parameter corresponds to the tune's genreID that we are changing
+    if(tuneGenreId != oldGenreId) {
+      return res.status(400).send('The genreId given in the URL does not correspond to the genreId in the tune we want to change.');
+    };
+    const findGenreId = genres.find((genre) => genre.id === newGenreId);
+    
+    if(!findGenreId) {
+      return res.status(400).send('The genreId does not exist.');
+    }
+    //If the genre exists and everything is ok, reassign the genreId
+    tuneToChange.genreId = newGenreId;
+  };
+
+  //CONTENT
+  if (req.body.content) {
+    const newContent = req.body.content;
+    //Run our content from body through a validation function
+    const valid = validateContent(newContent);
+    
+    //If the content is valid, change the change in our found Object, otherwise 400.
+    if(!valid) {
+      return res.status(400).send('The content property must have note, duration and timing(which has to be a number) and in ascending order.');
+    }
+    tuneToChange.content = newContent;
+  };
+
+  //Replace the old object with the new:
+  tunes[tuneIndex] = tuneToChange;
+  return res.status(200).json(tunes[tuneIndex]);
 });
+
+
+// **** GENRES ****
+
+// Read all genres
+app.get(myApi + 'genres', (req, res) => {
+  return res.status(200).json(genres);
+});
+
+
+
+// Create a new genre
+app.post(myApi + 'genres' + '/new', (req, res) => {
+  //Check if we are getting a request name, and if the request name is a string
+  if(!req.body.genreName || typeof req.body.genreName != "string") {
+    console.log(req.body.genreName);
+    return res.status(400).send('New genres require a name, and it needs to be a string.');
+  };
+
+  const name = req.body.genreName;
+  const findGenre = genres.find((genre) => genre.genreName === name);
+
+  //Check if the genre exists
+  if(findGenre) {
+    return res.status(400).send('A genre with this name already exists');
+  };
+  
+  const newId = nextId(genres);
+  const newGenre = { id: newId, genreName: name};
+  genres.push(newGenre);
+  return res.status(201).json(newGenre);
+
+});
+
+
+
+// Delete a genre
+app.delete(myApi + 'genres' + '/delete', (req, res) => {
+  if(!req.body.id || isNaN(+req.body.id)) {
+    return res.status(400).send('Request needs an ID and needs to be a number.');
+  }
+  //Try to find the genre with the request ID, return the index  
+  const genreIndex = genres.findIndex((genre) => genre.id === req.body.id);
+
+  if(genreIndex < 0) {
+    return res.status(404).send('No genre with this id exists.');
+  }
+
+  //Check if any tune with this genre exists
+  const findTune = tunes.find((tune) => tune.genreId === req.body.id);
+
+  if(findTune) {
+    return res.status(400).send('Could not delete, tune exists with this genre.');
+  }
+
+  //If everything is okay, we splice
+  const deletedObj = genres.splice(genreIndex, 1);
+  //Return the deleted Object
+  return res.status(200).json(deletedObj);
+
+});
+
+// **** File routes ****
 
 // Serve static files in root directory
 app.use(express.static(__dirname + '/'));
@@ -298,7 +384,7 @@ app.get('/', (req, res) => {
 
 //Blocking all endpoints that are not defined
 app.all('*', (req, res) => {
-  res.status(404).json({
+  res.status(405).json({
     error: 'This resource is not found'
   });
 });
