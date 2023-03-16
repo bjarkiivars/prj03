@@ -112,11 +112,11 @@ const validateContent = (content) => {
   };
 
   //Iterate the notes to check if any of the properties are missing
-  //We will also check if the timing is ascending
+  //We will also check if the timing is ascending e.g. 0, 1, 2, 3, ..., inf.
   let prior_timing = 0
 
   content.forEach((note) => {
-    if(!note.note || !note.duration || isNaN(note.timing)) {
+    if(typeof note.note != "string" || typeof note.duration != "string" || isNaN(note.timing)) {
       return_bool = false;
       return return_bool;
     }
